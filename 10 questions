@@ -1,0 +1,34 @@
+1.	3 methoods for reducing power consumption oi inverter > 
+-> reduce operating frequency
+-> reduce load capacitance
+-> reduce power supply voltage
+2.	2 regions in Ids-Vds current & what is the boundary
+	Linear
+	Saturation
+	Pinch off point (boundaries)
+3.	???
+	
+4.	List up 4 methods to shorten of delay time of an inverter (Make CMOS inverter faster) > inverter slide
+>	Load capacitance CL is smaller
+>	Power supply voltage, Vdd is higher
+>	|Vth| is smaller
+>	β is geater
+(Slide 77)
+5.	Describe which transistor is faster nMOS,PMOS ? why ? 
+>	nMOS is 3 times faster than PMOS> use larger PMOS gate.
+6.	3 goals in LSI design > over view
+	Functional
+	Performance
+	Time to market
+	profitable
+7.	3 way to increase the source-drain current of MOS transistor > W,L,Vth
+	Increase Channel length (W)
+	Increase Gate capacitance (Cox)
+	Reduce Channel Length (L)
+Refer (Slide 34)
+8.	How to reduce the sub_threshold leakage after an MOS transistor is fabricated
+	Change threshold voltage by (or?) changing Vds
+9.	2 major timing parameter in synchoronous design > setup time , hold time
+	Set up and hold time …..
+10.	Merits of CMOS inverter
+	Page 65
