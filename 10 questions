@@ -6,7 +6,9 @@
 	Linear
 	Saturation
 	Pinch off point (boundaries)
-3.	???
+3.	2 regions in Igs-Vgs current & what is the boundary?
+-> Normal and sub threshold
+-> Boundary: Vgs = Vth (slide 59)
 	
 4.	List up 4 methods to shorten of delay time of an inverter (Make CMOS inverter faster) > inverter slide
 >	Load capacitance CL is smaller
