@@ -1,0 +1,36 @@
+Hello everyone, I'm Hieu, I'm from RVC.
+Today I would like to present about Map Viewer plugin
+
+There are 3 parts in my presentation
+First is User story
+Second, I will introduce briefly about Memory structure
+Last, I will present about the features in Map Viewer plugin
+
+About User Story,
+Almost information of devices such as section information is stored in map file and shown by table. It's difficult to observed or check overall memory.
+so, users desire a feature which help them inspect and check memory visually. And Map Viewer plugin can support them to make this.
+
+Before presenting about Map Viewer plugin, I would to introduce briefly about Memory Structure to help everyone to understand shown informaiton in Map Viewer easier
+In memory of devices there are some memory region and each memory region contains one or many sections. and each section belong to a specified group
+Some memory region type and group of section are shown on the screen
+
+Now I will present about the functions in Map Viewer plugin
+The main function of MAp Viewer is to retrieve the Information of memory from map file and other plugin and display these information visually
+There are 3 parts in view. 
+First is left area. this area display overview information of memory region likes start address, name, used size and size of region.
+The color inside rectange will change from green to yellow to red base on used size of region
+USer can also view section information by clicking here.
+
+Next is the memory region part. In this area, used size and size of regions are shown visually. User can view and check memory easily
+When you hover on memory region in left area, the corresponding cell is highlighted
+And there is a displayed tooltip when hovering on regions here
+
+Last is detail informaiton area, the detail information is displayed here when clicking the memory regions in left area.
+In this area, there are 2 parts, this part show basic information and the other show all section in this region.
+Similar memory region part, cells are still highlighted and there is the tooltip when hovering
+
+Next, I would like to introduce about 2 buttons
+As you know, there are some non-map area in memory and usually are not shown.
+Now user can view these non-map area by pressing the Show/Hide non-map area button. These regions will be shown in left area.
+The next button is Show/Hide sections. With this button, USer can view all sections of memory and determine used and unused sections. 
+In additional, with this mode, user can view position of sections in memory easily and visually.
