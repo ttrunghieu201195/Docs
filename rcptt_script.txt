@@ -1,0 +1,55 @@
+//LIB_CreateProject -projectName "CCRX" -toolchain "CCRX" -toolchainVersion "v3.01.00" -deviceFamily "RX" -deviceName "R5F51101AxLM"
+//LIB_BuildProject -projectName "CCRX" -deviceFamily "RX"
+//Open_View "Memory Usage"
+//get-view "Memory Usage" | get-tab-folder | get-tab-item "Device Memory Usage" | click
+global [val len_actual 0]
+
+with [get-view "Memory Usage"] {
+    with [get-tab-folder] {
+        global [val len_actual [get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().length" -raw]] -override
+//            | equals 13 | verify-true
+//		loop [val count 0] [val n 13] {
+//			if [$n | lt $count] {
+//				get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[1].getChildren().Control[0].getText()" $count
+//				 | equals "0x00000000" | verify-true
+//        		get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[1].getChildren().Control[1].getText()" $count
+//        		 | equals "0x000027FF" | verify-true
+//        		get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[2].getChildren().Control[0].getText()" $count
+//        		 | equals InternalRam | verify-true
+//        		get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[2].getChildren().Control[1].getText()" $count
+//        		 | equals "2052/10240 byte(s) ( 20.04% )" | verify-true
+//			}
+//		}
+//        
+    }
+}
+
+global [val memoryAreas [ 
+	read-excel-file "D:/05_LinhTinh/99_Draft/MapViewer/IT_Expectation/RCPTT_MapViewer_Expectation/Expectation.xlsx" "CCRL_MemoryAreas" | to-list
+]]
+global [val len_expected 0]
+$memoryAreas | each [val content] {
+	clear-log-view
+	log [format "Page name: %s" [$content | get pageName]]
+	// Get count of rows
+	global [val len_expected [$content | get rows | length]] -override
+//	{
+//		// loop
+//		loop [val row_index 0] [val n [$len]] {
+//			if [$row_index | lt $n] {
+//					// Get one row and store to "row" variable
+//					let [val row [$content | list [get rows] | get $row_index]] {
+//						// if row is not empty, get values on row
+//						if [$row | get values | length | gt 0] {
+//							$row | get values | to-list | get 1| str | log
+//							$row | get values | to-list | get 3| str | log
+//						}
+//					recur [$row_index | plus 1] [$n]
+//					}
+////				}
+//			}
+//		}
+//	}
+}
+
+$len_actual | eq [$len_expected | div 3] | verify-true
