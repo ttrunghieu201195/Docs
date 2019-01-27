@@ -53,3 +53,95 @@ $memoryAreas | each [val content] {
 }
 
 $len_actual | eq [$len_expected | div 3] | verify-true
+
+
+---------------------Updated--------------
+//LIB_CreateProject -projectName "CCRX" -toolchain "CCRX" -toolchainVersion "v3.01.00" -deviceFamily "RX" -deviceName "R5F51101AxLM"
+//LIB_BuildProject -projectName "CCRX" -deviceFamily "RX"
+//Open_View "Memory Usage"
+//get-view "Memory Usage" | get-tab-folder | get-tab-item "Device Memory Usage" | click
+//global [val len_actual 0]
+
+//with [get-view "Memory Usage"] {
+//    with [get-tab-folder] {
+//        global [val len_actual [get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().length" -raw]] -override
+//            | equals 13 | verify-true
+//		loop [val count 0] [val n 13] {
+//			if [$n | lt $count] {
+//				get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[1].getChildren().Control[0].getText()" $count
+//				 | equals "0x00000000" | verify-true
+//        		get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[1].getChildren().Control[1].getText()" $count
+//        		 | equals "0x000027FF" | verify-true
+//        		get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[2].getChildren().Control[0].getText()" $count
+//        		 | equals InternalRam | verify-true
+//        		get-property "getItems().CTabItem[1].getControl().getChildren().Control[0].getChildren().Control[1].getChildren().Control[0].getChildren().Control[0].getChildren().Control[%d].getChildren().Control[2].getChildren().Control[1].getText()" $count
+//        		 | equals "2052/10240 byte(s) ( 20.04% )" | verify-true
+//			}
+//		}
+//        
+//    }
+//}
+
+global [val memoryAreas [ 
+	read-excel-file "D:/Expectation.xlsx" "CCRL_MemoryAreas" | to-list
+]]
+global [val len_expected 0]
+$memoryAreas | each [val content] {
+	clear-log-view
+	log [format "Page name: %s" [$content | get pageName]]
+	// Get count of rows
+	global [val len_expected [$content | get rows | length]] -override
+//	{
+	global [val results ""]
+	global [val memoryAreaList [list]]
+	global [val val_startAdd ""]
+	global [val val_endAdd ""]
+	global [val val_name ""]
+	global [val val_size ""]
+		// loop
+		loop [val row_index 0] [val n 9] {
+			if [$row_index | lt $n] {
+			// create a map to contain start address, end address, name and size
+//			let [val memoryArea]
+					// Get one row and store to "row" variable
+					let [val row [$content | list [get rows] | get [$row_index | mult 3 | plus 1]]] {
+						// if row is not empty, get values on row
+//						if [$row | get values | length | gt 0] {
+//							$row | get values | to-list | get 1| str | log
+							global [val val_startAdd [$row | get values | to-list | get 1| str]] -override
+//							$row | get values | to-list | get 3| str | log
+							global [val val_name [$row | get values | to-list | get 3| str]] -override
+//						}
+					}
+					let [val row [$content | list [get rows] | get [$row_index | mult 3 | plus 2]]] {
+						// if row is not empty, get values on row
+//						if [$row | get values | length | gt 0] {
+//							$row | get values | to-list | get 3| str | log
+							global [val val_size [$row | get values | to-list | get 3| str]] -override
+//							$row | get values | to-list | get 1| str | log
+							global [val val_endAdd [$row | get values | to-list | get 1| str]] -override
+//						}
+					}
+//					format "----" | log
+					let [val memoryArea [map [entry startAdd $val_startAdd] [entry endAdd $val_endAdd] [entry size $val_size] [entry name $val_name]]] {
+//						log[format "%s - %s - %s - %s" [$memoryArea | get startAdd] [$memoryArea | get name] [$memoryArea | get size] [$memoryArea | get endAdd]]
+//						global [val memoryAreaList [append -children $memoryArea]] -override
+						if [$results | not-eq ""] {
+							global [val results [format "%s, [%s - %s - %s - %s]" $results [$memoryArea | get startAdd] [$memoryArea | get name] [$memoryArea | get size] [$memoryArea | get endAdd]]] -override
+						} -else {
+							global [val results [format "[%s - %s - %s - %s]" [$memoryArea | get startAdd] [$memoryArea | get name] [$memoryArea | get size] [$memoryArea | get endAdd]]] -override
+						}
+//						log[$results]
+					}
+					recur [$row_index | plus 1] [$n]
+				}
+//				}
+			}
+			global [val memoryAreaList [$results | split -sep "," -trimResults]] -override
+			$memoryAreaList | each [val item] {
+				$item | log
+			}
+//	}
+}
+
+//$len_actual | eq [$len_expected | div 3] | verify-true
