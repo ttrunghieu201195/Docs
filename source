@@ -1,0 +1,99 @@
+Confluence_sample.py
+---------------------------------------------------
+import requests
+import json
+from bs4 import BeautifulSoup
+
+user = 'hieu.tran.eb'
+pw = 'Pass1234'
+
+# confluence = Confluence('https://jira.renesas.eu/confluence/', hieu.tran.eb, Pass1234)
+# print(Success)
+# status = confluence.get_page_by_id(44799685)
+
+path = 'https://jira.renesas.eu/confluence/rest/api/content'
+pageid = '44799685'
+
+# url = path + '/' +pageid + '/history/3'
+# ?expand=content.body.storage.value'
+
+url = 'https://jira.renesas.eu/confluence/rest/experimental/content/44799685/version/3?expand=content.body.storage.value'
+
+# url = path + '/' + pageid + 'history/3/macro/id/97d3da92-b7ae-4ffc-9eb7-254f290df28e'
+
+# url = path + '/' + pageid + '/child/page/content'
+
+print(url)
+
+r = requests.get(url, auth = (user, pw))
+
+content = r.json()['content']['body']['storage']['value']
+
+soup = BeautifulSoup(content, "html.parser")
+
+# print(content)
+print(soup.tbody.tr.th.string)
+
+print('----------------------------------------------------------')
+
+-------------------------------------------------------------------------------------------
+sample.py
+-------------
+from jira import JIRA
+import getpass
+import re
+
+members = '(chinh.nguyen.ym, hieu.tran.eb, manh.le.zn, nam.nguyen.te, nguyen.duong.uw, phuong.nguyen.px, van.tran.yg, vien.nguyen.uj, tung.tran.banvien, tien.truong-hoang.banvien, vinh.luong.xz)'
+
+sprint_reg = re.compile('.*id=(?P<id>[0-9]+).*name=(?P<name>[^,]+).*startDate=(?P<startDate>[^T]+).*endDate=(?P<endDate>[^T]+).*', flags=re.S)
+
+def get_list_filter(issues):
+    filter = 'issueKey in ('
+    for issue in issues:
+        filter = filter + (str(issue)) + ','
+    return filter[:-1] + ')'
+
+
+# user = input('Username: ')
+# pw = getpass.getpass('Password: ', stream = None)
+
+user = 'hieu.tran.eb'
+pw = 'Pass1234'
+
+acc = JIRA('https://jira.renesas.eu', basic_auth = (user, pw))
+
+print('Success')
+sprint_num = input("Sprint: ")
+sprint_name = 'e2 studio - Sprint ' + sprint_num
+
+sprints = acc.search_issues('Sprint = "' + sprint_name + '"', maxResults = 1)[0].fields.customfield_10004
+for sprint in sprints:
+    if(sprint_reg.match(sprint)):
+        mat = sprint_reg.search(sprint)
+        name = mat.group('name')
+        if name == sprint_name:
+            sprint_id = mat.group('id')
+            sprint_startDate = mat.group('startDate')
+            sprint_endDate = mat.group('endDate')
+            break
+
+print()
+			
+print('Sprint start date: ', sprint_startDate)
+print('Sprint end date: ', sprint_endDate)
+
+print()
+
+new_sprint_startDate = input("If sprint start date is incorrect, correct it (Press Enter to skip): ")
+if(new_sprint_startDate != ""):
+    sprint_startDate = new_sprint_startDate
+new_sprint_endDate = input("If sprint end date is incorrect, correct it (Press Enter to skip): ")
+if(new_sprint_endDate != ""):
+    sprint_endDate = new_sprint_endDate
+
+print()
+
+sprintplanning_filter = 'Type not in (Test, Sub-task, Epic, "Product Specification") AND assignee in ' + members + ' AND sprint = ' + sprint_id
+
+issues = acc.search_issues(sprintplanning_filter)
+print(get_list_filter(issues))
