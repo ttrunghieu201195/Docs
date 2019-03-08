@@ -97,3 +97,207 @@ sprintplanning_filter = 'Type not in (Test, Sub-task, Epic, "Product Specificati
 
 issues = acc.search_issues(sprintplanning_filter)
 print(get_list_filter(issues))
+
+-------------------------------------------------------------
+get_content_page.py
+
+-----------------------------------
+import requests
+import json
+from bs4 import BeautifulSoup
+from requests.auth import HTTPBasicAuth
+import getpass
+import re
+from jira import JIRA
+
+members = '(chinh.nguyen.ym, hieu.tran.eb, manh.le.zn, nam.nguyen.te, nguyen.duong.uw, phuong.nguyen.px, van.tran.yg, vien.nguyen.uj, tung.tran.banvien, tien.truong-hoang.banvien, vinh.luong.xz)'
+
+sprint_reg = re.compile('.*id=(?P<id>[0-9]+).*name=(?P<name>[^,]+).*startDate=(?P<startDate>[^T]+).*endDate=(?P<endDate>[^T]+).*', flags=re.S)
+
+pageid = '44799685'
+
+def get_content_page(pageid, version):
+	
+	url = 'https://jira.renesas.eu/confluence/rest/experimental/content/' + pageid + '/version/' + version + '?expand=content.body.storage'
+	
+	# user = 'hieu.tran.eb'
+	# pw = 'Pass1234'
+	print(url)
+	r = requests.get(url, auth = (user, pw))
+	# print(r.text)
+	html_content = r.json()['content']['body']['storage']['value']
+	return BeautifulSoup(html_content, "html.parser")
+
+def parse_data():
+	# get content of page
+	content = get_content_page(pageid, '6')
+	# initial list to contain data
+	rows = []
+	# parse content and store data to list
+	for tr in content.findAll("tr"):
+		cells = []
+		for td in tr.findAll("td"):
+			cells.append(td.text)
+		rows.append(cells)
+	# delete empty row first
+	del rows[0]
+	
+	dict = {}
+	returned_list = []
+	# process string
+	for row in rows:
+		if 'IDE-' in row[0]:
+			row[0] = row[0][row[0].find('IDE-'):len(row[0])]
+		dict = {'Feature': row[0], 'Requirements': row[1], 'Design': row[2], 'Unit Test': row[3], 'JUnit': row[4], 'Functional Test': row[5], 'Help Update': row[6], 'Status': row[7], 'Note': row[8]}
+		returned_list.append(dict)
+	
+	return returned_list
+
+def get_list_filter(issues):
+	list = []
+	for issue in issues:
+		list.append(str(issue))
+	return list
+
+def sprint_planning_checking():
+	# filter
+	sprintplanning_filter = 'Type not in (Test, Sub-task, Epic, "Product Specification") AND assignee in ' + members + ' AND sprint = ' + sprint_id
+
+	issues = acc.search_issues(sprintplanning_filter)
+	tickets_in_sprint = get_list_filter(issues)
+	print('Number of tickets in sprint ' + sprint_num + ': ' + str(len(tickets_in_sprint)))
+	print('--------------------')
+	print('Have not added to initial page yet')
+	for ticket in tickets_in_sprint:
+		if ticket not in  tickets_in_initialPage:
+			print(ticket + ' - ' + str(get_assignee_of_ticket(ticket)))
+
+def get_assignee_of_ticket(ticketId):
+	issue = acc.issue(ticketId)
+	# print(issue.fields.assignee)
+	return issue.fields.assignee
+
+
+def get_info_of_issue(issueId):
+	# rlinks = acc.remote_links(issueId)
+	issue = acc.issue(issueId)
+	for link in issue.fields.issuelinks:
+		if hasattr(link, "outwardIssue"):
+			print(link.outwardIssue.fields.summary)
+			
+	# for link in acc.remote_links(issueId):
+		# print(link.id)
+	# print('Link of issue:')
+	# print(issue.fields.remoteLinks[0])
+	get_remote_link_of_issue(issueId)
+
+def get_remote_link_of_issue(issueId):
+	# url = 'https://jira.renesas.eu/rest/api/2/issue/' + issueId + '/remotelink'
+	# r = requests.get(url, auth = (user, pw))
+	# content = json.dumps(json.loads(r.text), sort_keys=True, indent=4, separators=(",", ":"))
+	
+	print('remote link')
+	print(content[0])
+
+user = 'hieu.tran.eb'
+pw = 'Pass1234'
+
+acc = JIRA('https://jira.renesas.eu', basic_auth = (user, pw))
+
+print('--Login Success--')
+
+# sprint_num = input("Sprint: ")
+# sprint_name = 'e2 studio - Sprint ' + sprint_num
+
+# sprints = acc.search_issues('Sprint = "' + sprint_name + '"', maxResults = 1)[0].fields.customfield_10004
+# for sprint in sprints:
+    # if(sprint_reg.match(sprint)):
+        # mat = sprint_reg.search(sprint)
+        # name = mat.group('name')
+        # if name == sprint_name:
+            # sprint_id = mat.group('id')
+            # sprint_startDate = mat.group('startDate')
+            # sprint_endDate = mat.group('endDate')
+            # break
+
+# print()
+			
+# print('Sprint start date: ', sprint_startDate)
+# print('Sprint end date: ', sprint_endDate)
+
+# print()
+
+# new_sprint_startDate = input("If sprint start date is incorrect, correct it (Press Enter to skip): ")
+# if(new_sprint_startDate != ""):
+    # sprint_startDate = new_sprint_startDate
+# new_sprint_endDate = input("If sprint end date is incorrect, correct it (Press Enter to skip): ")
+# if(new_sprint_endDate != ""):
+    # sprint_endDate = new_sprint_endDate
+
+# print()
+
+# print('Get data in initial doc page')
+
+# data_in_initialPage = parse_data()
+
+# tickets_in_initialPage = []
+
+# for data in data_in_initialPage:
+	# tickets_in_initialPage.append(data['Feature'])
+
+# print(tickets_in_initialPage)
+
+# print('Checking for sprint planning')
+
+# sprint_planning_checking()
+
+# get_info_of_issue('IDE-11268')
+# print(acc.remote_links('IDE-11268'))
+link = acc.remote_link('IDE-11268', 31357)
+print(requests.get((link.object.url), auth = (user, pw)))
+
+# sprintplanning_filter = 'Type not in (Test, Sub-task, Epic, "Product Specification") AND assignee in ' + members + ' AND sprint = ' + sprint_id
+
+# issues = acc.search_issues(sprintplanning_filter)
+# print(get_list_filter(issues))
+	
+
+	
+# user = 'hieu.tran.eb'
+# pw = 'Pass1234'
+
+# path = 'https://jira.renesas.eu/confluence/rest/api/content'
+# pageid = '44799685'
+
+# url = 'https://jira.renesas.eu/confluence/rest/experimental/content/44799685/version/5?expand=content.body.storage'
+
+
+# r = requests.get(url, auth = (user, pw))
+
+# html_content = r.json()['content']['body']['storage']['value']
+
+# soup = BeautifulSoup(html_content, "html.parser")
+
+# print(soup)
+# rows = []
+# for tr in soup.findAll("tr"):
+	# cells = []
+	# for td in tr.findAll("td"):
+		# print(td)
+		# cells.append(td.text)
+		# print(cells)
+		# print(td.text)
+		# print('----')
+	# print('------***------')
+	# rows.append(cells)
+# del rows[0]
+# print(len(rows))
+
+# for row in rows:
+	# print(len(row))
+	# if 'IDE-' in row[0]:
+		# row[0] = row[0][row[0].find('IDE-'):len(row[0])]
+		# print(a)
+
+# for row in rows:
+	# print(row)
